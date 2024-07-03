@@ -1,0 +1,9 @@
+{
+  "platforms": ["ios", "tvos", "android", "web"],
+  "ios": {
+    "modules": ["AliyunPushModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.aliyun.push.AliyunPushModule"]
+  }
+}
