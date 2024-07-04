@@ -1,26 +1,51 @@
-import { NativeModulesProxy, EventEmitter, Subscription } from 'expo-modules-core';
+import { Platform } from "react-native";
+import { UnavailabilityError } from "expo-modules-core";
 
-// Import the native module. On web, it will be resolved to AliyunPush.web.ts
-// and on native platforms to AliyunPush.ts
-import AliyunPushModule from './AliyunPushModule';
-import AliyunPushView from './AliyunPushView';
-import { ChangeEventPayload, AliyunPushViewProps } from './AliyunPush.types';
+import AliyunPushModule from "./AliyunPushModule";
 
-// Get the native constant value.
-export const PI = AliyunPushModule.PI;
-
-export function hello(): string {
-  return AliyunPushModule.hello();
+export function init(): Promise<void> {
+  if (Platform.OS !== "ios") {
+    console.warn("[expo-aliyun-push] init is not support in this platform");
+    return Promise.resolve();
+  }
+  if (!AliyunPushModule.init) {
+    throw new UnavailabilityError("expo-aliyun-push", "init");
+  }
+  return AliyunPushModule.init();
 }
 
-export async function setValueAsync(value: string) {
-  return await AliyunPushModule.setValueAsync(value);
+export function register(deviceToken?: string): Promise<void> {
+  if (!AliyunPushModule.register) {
+    throw new UnavailabilityError("expo-aliyun-push", "register");
+  }
+  if (Platform.OS === "ios" && !deviceToken) {
+    if (!deviceToken) {
+      throw new Error(
+        "[expo-aliyun-push] deviceToken is required, the value can be get by expo-notifications"
+      );
+    }
+    AliyunPushModule.register(deviceToken);
+  }
+  return AliyunPushModule.register();
 }
 
-const emitter = new EventEmitter(AliyunPushModule ?? NativeModulesProxy.AliyunPush);
-
-export function addChangeListener(listener: (event: ChangeEventPayload) => void): Subscription {
-  return emitter.addListener<ChangeEventPayload>('onChange', listener);
+export function getDeviceId(): string {
+  if (!AliyunPushModule.getDeviceId) {
+    throw new UnavailabilityError("expo-aliyun-push", "getDeviceId");
+  }
+  return AliyunPushModule.getDeviceId();
 }
 
-export { AliyunPushView, AliyunPushViewProps, ChangeEventPayload };
+export function bindAccount(account: string): Promise<void> {
+  if (!AliyunPushModule.bindAccount) {
+    throw new UnavailabilityError("expo-aliyun-push", "bindAccount");
+  }
+  return AliyunPushModule.bindAccount(account);
+}
+
+export function unbindAccount(): Promise<void> {
+  if (!AliyunPushModule.bindAccount) {
+    throw new UnavailabilityError("expo-aliyun-push", "unbindAccount");
+  }
+  return AliyunPushModule.unbindAccount();
+}

@@ -3,6 +3,9 @@ apply plugin: 'com.android.library'
 group = 'expo.modules.aliyun.push'
 version = '0.1.0'
 
+def enableXiaoMiPush = findProperty("aliyun.push.third.xiaomi.enabled") ?: false
+def enableHuaweiPush = findProperty("aliyun.push.third.huawei.enabled") ?: false
+
 def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
 apply from: expoModulesCorePlugin
 applyKotlinExpoModulesCorePlugin()
@@ -36,8 +39,32 @@ android {
   defaultConfig {
     versionCode 1
     versionName "0.1.0"
+
+    buildConfigField("boolean", "XIAOMI_PUSH_ENABLED", enableXiaoMiPush.toString())
+    buildConfigField("boolean", "HUAWEI_PUSH_ENABLED", enableHuaweiPush.toString())
   }
   lintOptions {
     abortOnError false
   }
+}
+
+rootProject.allprojects {
+  repositories {
+    maven {url 'https://developer.huawei.com/repo/'}
+    maven {
+      url 'http://maven.aliyun.com/nexus/content/repositories/releases/'
+      name 'aliyun'
+      allowInsecureProtocol = true
+    }
+  }
+}
+
+dependencies {
+  implementation project(':expo-notifications')
+
+  api 'com.aliyun.ams:alicloud-android-push:3.8.8.1'
+
+  api 'com.aliyun.ams:alicloud-android-third-push:3.8.8'
+  api 'com.aliyun.ams:alicloud-android-third-push-xiaomi:3.8.8'
+  api 'com.aliyun.ams:alicloud-android-third-push-huawei:3.8.8'
 }

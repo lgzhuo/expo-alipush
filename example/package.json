@@ -1,7 +1,7 @@
 {
   "name": "expo-aliyun-push-example",
   "version": "1.0.0",
-  "main": "expo/AppEntry.js",
+  "main": "index.ts",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
@@ -9,8 +9,11 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "dayjs": "^1.11.11",
     "expo": "~51.0.17",
     "expo-aliyun-push": "workspace:*",
+    "expo-build-properties": "~0.12.3",
+    "expo-notifications": "~0.28.9",
     "react": "18.2.0",
     "react-native": "0.74.2"
   },

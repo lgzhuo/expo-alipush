@@ -24,6 +24,22 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true,
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "extraMavenRepos": [
+              "https://developer.huawei.com/repo/",
+              "https://maven.aliyun.com/nexus/content/repositories/releases/"
+            ]
+          }
+        }
+      ]
+    ]
   }
 }

@@ -4,6 +4,9 @@
     "modules": ["AliyunPushModule"]
   },
   "android": {
-    "modules": ["expo.modules.aliyun.push.AliyunPushModule"]
+    "modules": [
+      "expo.modules.aliyun.push.AliyunPushModule",
+      "expo.modules.aliyun.push.notification.emitting.AliyunNotificationEmitter"
+    ]
   }
 }
