@@ -23,6 +23,7 @@ import {
   type NotificationResponse,
   type Notification,
   setNotificationHandler,
+  registerTaskAsync,
 } from "expo-notifications";
 import dayjs from "dayjs";
 
@@ -38,6 +39,14 @@ setNotificationHandler({
   handleError(notificationId, error) {
     console.error(`notification ${notificationId} handle error`, error);
   },
+});
+
+AliyunPush.setCustomNotificationConfig(12, {
+  isBuildWhenAppInForeground: false,
+});
+
+AliyunPush.setCustomNotificationConfig(11, {
+  isBuildWhenAppInForeground: true,
 });
 
 export default function App() {
@@ -216,11 +225,12 @@ function EventsList(
           const { notification } = item;
           return (
             <Pressable
+              style={styles.itemContainer}
               onPress={() => alert(JSON.stringify(notification, undefined, 2))}
             >
               <Text>
-                {dayjs(notification.date).format("HH:mm:ss")}, notification
-                received
+                {dayjs(notification.date).format("HH:mm:ss")}, notification{" "}
+                <Text style={styles.textAccent}>received</Text>
               </Text>
               <Text>ID: {notification.request.identifier}</Text>
               <Text>Title: {notification.request.content.title}</Text>
@@ -230,10 +240,12 @@ function EventsList(
           const { date, response } = item;
           return (
             <Pressable
+              style={styles.itemContainer}
               onPress={() => alert(JSON.stringify(response, undefined, 2))}
             >
               <Text>
-                {dayjs(date).format("HH:mm:ss")}, notification response received
+                {dayjs(date).format("HH:mm:ss")}, notification{" "}
+                <Text style={styles.textAccent}>response received</Text>
               </Text>
               <Text>
                 Notification ID: {response.notification.request.identifier}
@@ -244,7 +256,7 @@ function EventsList(
         } else if (item.type === "dropped") {
           const { date } = item;
           return (
-            <View>
+            <View style={styles.itemContainer}>
               <Text>
                 {dayjs(date).format("HH:mm:ss")}, notification dropped
               </Text>
@@ -300,5 +312,15 @@ const styles = StyleSheet.create({
   },
   inputInRow: {
     flex: 1,
+  },
+  itemContainer: {
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#333",
+    margin: 2,
+    padding: 2,
+  },
+  textAccent: {
+    fontWeight: "bold",
   },
 });

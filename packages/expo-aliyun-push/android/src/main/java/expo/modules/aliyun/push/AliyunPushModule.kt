@@ -4,10 +4,14 @@ import android.content.Context
 import android.util.Log
 import com.alibaba.sdk.android.push.CommonCallback
 import com.alibaba.sdk.android.push.noonesdk.PushServiceFactory
+import com.alibaba.sdk.android.push.notification.BasicCustomPushNotification
+import com.alibaba.sdk.android.push.notification.CustomNotificationBuilder
 import expo.modules.kotlin.Promise
+import expo.modules.kotlin.exception.Exceptions
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import expo.modules.kotlin.exception.Exceptions
+import expo.modules.kotlin.records.Field
+import expo.modules.kotlin.records.Record
 import java.util.Locale
 
 class AliyunPushModule : Module() {
@@ -24,6 +28,15 @@ class AliyunPushModule : Module() {
 
     override fun definition() = ModuleDefinition {
         Name("AliyunPush")
+
+        Constants(
+            "REMIND_TYPE" to mapOf(
+                "SOUND" to BasicCustomPushNotification.REMIND_TYPE_SOUND,
+                "VIBRATE" to BasicCustomPushNotification.REMIND_TYPE_VIBRATE,
+                "SILENT" to BasicCustomPushNotification.REMIND_TYPE_SILENT,
+                "VIBRATE_AND_SOUND" to BasicCustomPushNotification.REMIND_TYPE_VIBRATE_AND_SOUND
+            ),
+        )
 
         AsyncFunction("register") { promise: Promise ->
             if (registerStatus == RegisterStatus.Registering) {
@@ -66,6 +79,44 @@ class AliyunPushModule : Module() {
                 .unbindAccount(AsyncCallback(promise, "unbindAccount"))
         }
 
+        AsyncFunction("setCustomNotificationConfig") { id: Int, config: CustomNotificationConfig, promise: Promise ->
+            CustomNotificationBuilder.getInstance()
+                .setCustomNotification(id, BasicCustomPushNotification().also { custom ->
+                    config.isBuildWhenAppInForeground?.let {
+                        custom.isBuildWhenAppInForeground = it
+                    }
+                    config.isServerOptionFirst?.let {
+                        custom.isServerOptionFirst = it
+                    }
+                    config.remindType?.let {
+                        custom.remindType = it
+                    }
+                    config.notificationFlags?.let {
+                        custom.notificationFlags = it
+                    }
+                }).also {
+                    if (it) {
+                        promise.resolve()
+                    } else {
+                        promise.reject("E_SET_CUSTOM_NOTIFICATION_CONFIG", null, null)
+                    }
+                }
+        }
+
+    }
+
+    class CustomNotificationConfig : Record {
+        @Field
+        val isBuildWhenAppInForeground: Boolean? = null
+
+        @Field
+        val isServerOptionFirst: Boolean? = null
+
+        @Field
+        val remindType: Int? = null
+
+        @Field
+        val notificationFlags: Int? = null
     }
 
     private open class AsyncCallback(

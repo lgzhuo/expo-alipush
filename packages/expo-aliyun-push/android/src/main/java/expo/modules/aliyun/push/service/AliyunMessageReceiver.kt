@@ -11,9 +11,10 @@ class AliyunMessageReceiver : MessageReceiver() {
         const val TAG = "expo-aliyun-push"
     }
 
-    private val delegate: AliyunMessageDelegate by lazy {
-        AliyunMessageDelegate()
-    }
+    private var _delegate: AliyunMessageDelegate? = null
+
+    private fun getDelegate(context: Context) =
+        _delegate ?: AliyunMessageDelegate(context).also { _delegate = it }
 
     override fun onNotificationOpened(
         context: Context,
@@ -22,7 +23,7 @@ class AliyunMessageReceiver : MessageReceiver() {
         extraMap: String?
     ) {
         Log.d(TAG, "onNotificationOpened title:$title summary:$summary extraMap:$extraMap")
-        delegate.onNotificationOpened(context, title, summary, extraMap)
+        getDelegate(context).onNotificationOpened(context, title, summary, extraMap)
     }
 
     override fun onNotificationRemoved(context: Context?, messageId: String?) {
@@ -36,7 +37,7 @@ class AliyunMessageReceiver : MessageReceiver() {
         extraMap: MutableMap<String, String>?
     ) {
         Log.d(TAG, "onNotification title:$title summary:$summary extraMap:$extraMap")
-        delegate.onNotification(context, title, summary, extraMap)
+        getDelegate(context).onNotification(context, title, summary, extraMap)
     }
 
     override fun onMessage(context: Context?, message: CPushMessage?) {
@@ -53,11 +54,11 @@ class AliyunMessageReceiver : MessageReceiver() {
             TAG,
             "onNotificationClickedWithNoAction title:$title summary:$summary extraMap:$extraMap"
         )
-        delegate.onNotificationClickedWithNoAction(context, title, summary, extraMap)
+        getDelegate(context).onNotificationClickedWithNoAction(context, title, summary, extraMap)
     }
 
     override fun onNotificationReceivedInApp(
-        context: Context?,
+        context: Context,
         title: String?,
         summary: String?,
         extraMap: MutableMap<String, String>?,
@@ -69,7 +70,7 @@ class AliyunMessageReceiver : MessageReceiver() {
             TAG,
             "onNotificationReceivedInApp title:$title summary:$summary extraMap:$extraMap openType:$openType openActivity:$openActivity openUrl:$openUrl"
         )
-        delegate.onNotificationReceivedInApp(
+        getDelegate(context).onNotificationReceivedInApp(
             context,
             title,
             summary,

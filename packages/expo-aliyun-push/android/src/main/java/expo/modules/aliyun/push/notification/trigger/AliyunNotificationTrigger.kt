@@ -7,7 +7,7 @@ import androidx.annotation.RequiresApi
 import expo.modules.notifications.notifications.interfaces.NotificationTrigger
 import expo.modules.aliyun.push.notification.AliyunNotification
 
-class AliyunNotificationTrigger(private val notification: AliyunNotification) : NotificationTrigger {
+class AliyunNotificationTrigger(val notification: AliyunNotification) : NotificationTrigger {
 
     constructor(parcel: Parcel) : this(
         parcel.readParcelable<AliyunNotification>(AliyunNotificationTrigger::class.java.classLoader)!!
@@ -16,7 +16,7 @@ class AliyunNotificationTrigger(private val notification: AliyunNotification) : 
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun getNotificationChannel(): String? {
-        return notification.getChannel() ?: super.getNotificationChannel()
+        return notification.getExtra("channelId")
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {

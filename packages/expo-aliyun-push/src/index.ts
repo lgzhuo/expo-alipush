@@ -2,6 +2,7 @@ import { Platform } from "react-native";
 import { UnavailabilityError } from "expo-modules-core";
 
 import AliyunPushModule from "./AliyunPushModule";
+import { CustomNotificationConfig } from "./AliyunPushModule.types";
 
 export function init(): Promise<void> {
   if (Platform.OS !== "ios") {
@@ -48,4 +49,21 @@ export function unbindAccount(): Promise<void> {
     throw new UnavailabilityError("expo-aliyun-push", "unbindAccount");
   }
   return AliyunPushModule.unbindAccount();
+}
+
+/**
+ * Android only
+ *
+ */
+export function setCustomNotificationConfig(
+  id: number,
+  config: CustomNotificationConfig
+): Promise<void> {
+  if (!AliyunPushModule.setCustomNotificationConfig) {
+    throw new UnavailabilityError(
+      "expo-aliyun-push",
+      "setCustomNotificationConfig"
+    );
+  }
+  return AliyunPushModule.setCustomNotificationConfig(id, config);
 }

@@ -13,11 +13,17 @@ import expo.modules.aliyun.push.notification.AliyunNotification
 import expo.modules.aliyun.push.notification.AliyunNotificationManager
 import expo.modules.aliyun.push.notification.AliyunNotificationResponse
 import expo.modules.aliyun.push.notification.AliyunNotificationAction
+import expo.modules.aliyun.push.notification.NotificationTransformer
 
-class PopupPushDelegate(private val context: Context) : ReactActivityLifecycleListener, PopupNotifyClickListener {
+class PopupPushDelegate(private val context: Context) : ReactActivityLifecycleListener,
+    PopupNotifyClickListener {
 
     private val notifyClick: PopupNotifyClick by lazy {
         PopupNotifyClick(this)
+    }
+
+    private val transformer: NotificationTransformer by lazy {
+        NotificationTransformer(context)
     }
 
     override fun onCreate(activity: Activity?, savedInstanceState: Bundle?) {
@@ -41,7 +47,7 @@ class PopupPushDelegate(private val context: Context) : ReactActivityLifecycleLi
         )
         NotificationsService.createNotificationResponseIntent(
             context,
-            response.notification.createExpoNotification(),
+            transformer.toExpoNotification(response.notification),
             response.action.createExpoNotificationAction()
         ).send()
         AliyunNotificationManager.instances.forEach {
