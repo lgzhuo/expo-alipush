@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "expo-aliyun-push-example",
-    "slug": "expo-aliyun-push-example",
+    "name": "expo-alipush-example",
+    "slug": "expo-alipush-example",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,14 +13,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "expo.modules.aliyun.push.example"
+      "bundleIdentifier": "expo.modules.alipush.example"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "expo.modules.aliyun.push.example"
+      "package": "expo.modules.alipush.example"
     },
     "web": {
       "favicon": "./assets/favicon.png"

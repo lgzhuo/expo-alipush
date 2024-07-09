@@ -1,9 +1,9 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 import type {
-  AliyunPushConfig,
-  AliyunAndroidConfig,
-  AliyunIOSConfig,
-} from "expo-aliyun-push/plugin";
+  AlipushConfig,
+  AlipushAndroidConfig,
+  AlipushIOSConfig,
+} from "expo-alipush/plugin";
 
 export default (context: ConfigContext): Partial<ExpoConfig> => {
   let { config } = context;
@@ -18,29 +18,29 @@ export default (context: ConfigContext): Partial<ExpoConfig> => {
     (config.ios ??= {}).bundleIdentifier = iosBundleIdentifier;
   }
 
-  config = withAliyunPushAppConfig(config);
+  config = withAlipushConfig(config);
 
   return config;
 };
 
-/* aliyun push config */
+/* alipush config */
 
-function withAliyunPushAppConfig(
+function withAlipushConfig(
   config: Partial<ExpoConfig>
 ): Partial<ExpoConfig> {
-  const aliyunPushConfig: AliyunPushConfig = {
-    android: getAliyunAndroidConfig(config),
-    ios: getAliyunIOSConfig(config),
+  const alipushConfig: AlipushConfig = {
+    android: getAlipushAndroidConfig(config),
+    ios: getAlipushIOSConfig(config),
   };
 
   config.plugins ??= [];
-  config.plugins.push(["expo-aliyun-push", aliyunPushConfig]);
+  config.plugins.push(["expo-alipush", alipushConfig]);
   return config;
 }
 
-function getAliyunAndroidConfig(
+function getAlipushAndroidConfig(
   config: Partial<ExpoConfig>
-): AliyunAndroidConfig | undefined {
+): AlipushAndroidConfig | undefined {
   const appKey = process.env.ANDROID_APP_KEY;
   const appSecret = process.env.ANDROID_APP_SECRET;
 
@@ -49,14 +49,14 @@ function getAliyunAndroidConfig(
       appKey,
       appSecret,
       third: {
-        xiaomi: getAliyunXiaomiConfig(),
+        xiaomi: getXiaomiConfig(),
       },
     };
   }
 }
 
-function getAliyunXiaomiConfig(): NonNullable<
-  AliyunAndroidConfig["third"]
+function getXiaomiConfig(): NonNullable<
+  AlipushAndroidConfig["third"]
 >["xiaomi"] {
   const appID = process.env.XIAOMI_APP_ID;
   const appKey = process.env.XIAOMI_APP_KEY;
@@ -69,9 +69,9 @@ function getAliyunXiaomiConfig(): NonNullable<
     : undefined;
 }
 
-function getAliyunIOSConfig(
+function getAlipushIOSConfig(
   config: Partial<ExpoConfig>
-): AliyunIOSConfig | undefined {
+): AlipushIOSConfig | undefined {
   const appKey = process.env.IOS_APP_KEY;
   const appSecret = process.env.IOS_APP_SECRET;
 

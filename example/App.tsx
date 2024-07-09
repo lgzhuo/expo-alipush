@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import * as AliyunPush from "expo-aliyun-push";
+import * as AliyunPush from "expo-alipush";
 import * as ExpoNotifications from "expo-notifications";
 import {
   AndroidImportance,
@@ -55,7 +55,7 @@ export default function App() {
       <View style={styles.headerContainer}>
         {Platform.OS === "android" && (
           <>
-            <Text style={{ userSelect: "text" }}>
+            <Text style={{ userSelect: "text" }} onPress={() => console.log('Alipush devcieId: ' + AliyunPush.getDeviceId())}>
               DeviceId: {AliyunPush.getDeviceId()}
             </Text>
             <NotificationChannel />

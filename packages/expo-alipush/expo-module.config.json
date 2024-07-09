@@ -1,0 +1,12 @@
+{
+  "platforms": ["ios", "tvos", "android", "web"],
+  "ios": {
+    "modules": ["AlipushModule"]
+  },
+  "android": {
+    "modules": [
+      "expo.modules.alipush.AlipushModule",
+      "expo.modules.alipush.notification.emitting.AlipushNotificationEmitter"
+    ]
+  }
+}

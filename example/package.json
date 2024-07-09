@@ -1,5 +1,5 @@
 {
-  "name": "expo-aliyun-push-example",
+  "name": "expo-alipush-example",
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
@@ -11,7 +11,7 @@
   "dependencies": {
     "dayjs": "^1.11.11",
     "expo": "~51.0.17",
-    "expo-aliyun-push": "workspace:*",
+    "expo-alipush": "workspace:*",
     "expo-build-properties": "~0.12.3",
     "expo-notifications": "~0.28.9",
     "react": "18.2.0",
