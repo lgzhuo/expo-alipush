@@ -1,33 +1,28 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  Button,
-  Platform,
-  TextInput,
-  FlatList,
-  Pressable,
-  FlatListProps,
-} from "react-native";
+import dayjs from "dayjs";
 import * as AliyunPush from "expo-aliyun-push";
-import React, { useEffect, useImperativeHandle, useRef, useState } from "react";
+import * as ExpoNotifications from "expo-notifications";
 import {
   AndroidImportance,
-  getPermissionsAsync,
-  requestPermissionsAsync,
-  setNotificationChannelAsync,
   getDevicePushTokenAsync,
-  addNotificationReceivedListener,
-  addNotificationResponseReceivedListener,
-  addNotificationsDroppedListener,
+  getPermissionsAsync,
   type NotificationResponse,
-  type Notification,
-  setNotificationHandler,
-  registerTaskAsync,
+  requestPermissionsAsync,
+  setNotificationChannelAsync
 } from "expo-notifications";
-import dayjs from "dayjs";
+import React, { useEffect, useImperativeHandle, useRef, useState } from "react";
+import {
+  Button,
+  FlatList,
+  FlatListProps,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
-setNotificationHandler({
+AliyunPush.setNotificationHandler({
   async handleNotification(notification) {
     console.debug("handle notification", notification);
     return {
@@ -53,6 +48,7 @@ export default function App() {
   const [hasRegistered, setHasRegistered] = useState<boolean>();
 
   const eventsRef = useRef<{ clear(): void }>(null);
+  const [isAliyunEvents, setIsAliyunEvents] = useState(true);
 
   const renderHeader = () => {
     return (
@@ -76,6 +72,15 @@ export default function App() {
         </View>
         <BindAccount />
         <View style={styles.row}>
+          <Text>
+            Events Type{" "}
+            {isAliyunEvents
+              ? "AliyunNotificationEvents"
+              : "ExpoNotificationsEvents"}
+          </Text>
+          <Button title="Toggle" onPress={() => setIsAliyunEvents((v) => !v)} />
+        </View>
+        <View style={styles.row}>
           <Text>Events List</Text>
           <Button
             title="Clear Events"
@@ -87,7 +92,11 @@ export default function App() {
   };
 
   return (
-    <EventsList ListHeaderComponent={renderHeader()} eventsRef={eventsRef} />
+    <EventsList
+      ListHeaderComponent={renderHeader()}
+      eventsRef={eventsRef}
+      isAliyunEvents={isAliyunEvents}
+    />
   );
 }
 
@@ -152,7 +161,7 @@ type EventItem =
   | {
       type: "notification";
       date: Date;
-      notification: Notification;
+      notification: AliyunPush.Notification;
     }
   | {
       type: "response";
@@ -164,15 +173,24 @@ type EventItem =
       date: Date;
     };
 
-function EventsList(
-  props: Omit<FlatListProps<EventItem>, "data" | "renderItem"> & {
-    eventsRef: React.Ref<{
-      clear(): void;
-    }>;
-  }
-) {
+function EventsList({
+  isAliyunEvents,
+  eventsRef,
+  ...props
+}: Omit<FlatListProps<EventItem>, "data" | "renderItem"> & {
+  eventsRef: React.Ref<{
+    clear(): void;
+  }>;
+  isAliyunEvents?: boolean;
+}) {
   const [data, setData] = useState<EventItem[]>([]);
+
   useEffect(() => {
+    const {
+      addNotificationReceivedListener,
+      addNotificationResponseReceivedListener,
+      addNotificationsDroppedListener,
+    } = isAliyunEvents ? AliyunPush : ExpoNotifications;
     const subscriptions = [
       addNotificationReceivedListener((notification) => {
         setData((data) => [
@@ -205,10 +223,10 @@ function EventsList(
       }),
     ];
     return () => subscriptions.forEach((subscription) => subscription.remove());
-  }, []);
+  }, [isAliyunEvents]);
 
   useImperativeHandle(
-    props.eventsRef,
+    eventsRef,
     () => ({
       clear() {
         setData([]);

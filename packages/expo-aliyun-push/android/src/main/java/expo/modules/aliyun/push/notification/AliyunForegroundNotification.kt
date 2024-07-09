@@ -5,9 +5,9 @@ import android.os.Parcelable
 
 open class AliyunForegroundNotification : AliyunNotification {
 
-    private val openType: Int
-    private val openActivity: String?
-    private val openUrl: String?
+    val openType: Int
+    val openActivity: String?
+    val openUrl: String?
 
     constructor(
         title: String?,

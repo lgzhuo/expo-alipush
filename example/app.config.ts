@@ -48,8 +48,25 @@ function getAliyunAndroidConfig(
     return {
       appKey,
       appSecret,
+      third: {
+        xiaomi: getAliyunXiaomiConfig(),
+      },
     };
   }
+}
+
+function getAliyunXiaomiConfig(): NonNullable<
+  AliyunAndroidConfig["third"]
+>["xiaomi"] {
+  const appID = process.env.XIAOMI_APP_ID;
+  const appKey = process.env.XIAOMI_APP_KEY;
+
+  return appID && appKey
+    ? {
+        appID,
+        appKey,
+      }
+    : undefined;
 }
 
 function getAliyunIOSConfig(

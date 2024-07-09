@@ -34,6 +34,8 @@ class AliyunNotificationExtra(private val extra: Map<String, String>?) : Parcela
 
     fun get(key: String) = extra?.get(key)
 
+    fun toMap() = extra?.toMap() ?: mapOf()
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeMap(extra)
     }

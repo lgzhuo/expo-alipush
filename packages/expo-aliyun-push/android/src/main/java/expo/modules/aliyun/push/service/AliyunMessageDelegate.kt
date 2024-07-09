@@ -8,25 +8,24 @@ import expo.modules.aliyun.push.notification.AliyunNotificationAction
 import expo.modules.aliyun.push.notification.AliyunNotificationManager
 import expo.modules.aliyun.push.notification.AliyunNotificationResponse
 import expo.modules.aliyun.push.notification.NotificationTransformer
+import expo.modules.core.utilities.ifNull
 import expo.modules.notifications.service.NotificationsService
 
-open class AliyunMessageDelegate(protected val context: Context) {
+open class AliyunMessageDelegate {
 
-    companion object {
-        private val listeners get() = AliyunNotificationManager.instances
-    }
-
-    private val transformer: NotificationTransformer by lazy { NotificationTransformer(context) }
+    private var transformer: NotificationTransformer? = null;
+    private fun getTransformer(context: Context): NotificationTransformer =
+        transformer.ifNull {
+            NotificationTransformer(context).also { transformer = it }
+        }
 
     fun onNotificationOpened(context: Context, title: String?, summary: String?, extra: String?) {
         val notification = AliyunNotification(title, summary, extra)
         val response = AliyunNotificationResponse(notification, AliyunNotificationAction.Default)
-        NotificationsService.createNotificationResponseIntent(
-            context,
-            transformer.toExpoNotification(notification),
-            response.action.createExpoNotificationAction()
-        ).send()
-        listeners.forEach { it.onNotificationResponseReceived(response) }
+        // expo-notifications response all initial and new intent of activity as push notification
+        // so we don't send notification response by expo NotificationsService, or the response event
+        // will triggered twice.
+        AliyunNotificationManager.receive(response)
     }
 
     fun onNotificationRemoved(p0: Context?, p1: String?) {
@@ -39,10 +38,9 @@ open class AliyunMessageDelegate(protected val context: Context) {
         summary: String?,
         extraMap: MutableMap<String, String>?
     ) {
+        // this notification has present by aliyun sdk, we emit it to js side but not handle by expo-notifications
         val notification = AliyunNotification(title, summary, extraMap)
-        listeners.forEach {
-            it.onNotificationReceived(notification)
-        }
+        AliyunNotificationManager.receive(notification)
     }
 
     fun onMessage(p0: Context?, p1: CPushMessage?) {
@@ -57,18 +55,11 @@ open class AliyunMessageDelegate(protected val context: Context) {
     ) {
         val notification = AliyunNotification(title, summary, extra)
         val response = AliyunNotificationResponse(notification, AliyunNotificationAction.NoAction)
-        NotificationsService.createNotificationResponseIntent(
-            context,
-            transformer.toExpoNotification(notification),
-            response.action.createExpoNotificationAction()
-        ).send()
-        listeners.forEach {
-            it.onNotificationResponseReceived(response)
-        }
+        AliyunNotificationManager.receive(response)
     }
 
     fun onNotificationReceivedInApp(
-        context: Context?,
+        context: Context,
         title: String?,
         summary: String?,
         extraMap: MutableMap<String, String>?,
@@ -79,9 +70,10 @@ open class AliyunMessageDelegate(protected val context: Context) {
         val notification = AliyunForegroundNotification(
             title, summary, extraMap, openType, openActivity, openUrl
         )
+        AliyunNotificationManager.receive(notification)
+
         // foreground notification behavior same as expo notification
-        // it will handle by notification handling callback in js side
-        NotificationsService.receive(context!!, transformer.toExpoNotification(notification))
-        listeners.forEach { it.onForegroundNotificationReceived(notification) }
+        // it will handle by expo-notifications handling callback in js side
+        NotificationsService.receive(context, getTransformer(context).toExpoNotification(notification))
     }
 }

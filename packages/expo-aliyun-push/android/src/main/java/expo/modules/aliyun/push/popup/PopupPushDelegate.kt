@@ -50,9 +50,7 @@ class PopupPushDelegate(private val context: Context) : ReactActivityLifecycleLi
             transformer.toExpoNotification(response.notification),
             response.action.createExpoNotificationAction()
         ).send()
-        AliyunNotificationManager.instances.forEach {
-            it.onNotificationResponseReceived(response)
-        }
+        AliyunNotificationManager.receive(response)
     }
 
 }
