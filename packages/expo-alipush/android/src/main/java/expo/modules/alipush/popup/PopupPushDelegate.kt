@@ -45,11 +45,8 @@ class PopupPushDelegate(private val context: Context) : ReactActivityLifecycleLi
             AlipushNotification(title, summary, extraMap),
             AlipushNotificationAction.Sys
         )
-        NotificationsService.createNotificationResponseIntent(
-            context,
-            transformer.toExpoNotification(response.notification),
-            response.action.createExpoNotificationAction()
-        ).send()
+        // expo-notifications will response to this by activity intent
+        // so we don't send it to expo-notifications to avoid duplicate
         AlipushNotificationManager.receive(response)
     }
 

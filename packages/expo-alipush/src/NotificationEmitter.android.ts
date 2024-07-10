@@ -3,10 +3,12 @@ import type * as ExpoNotifications from "expo-notifications";
 import {
   addNotificationReceivedListener as addExpoNotificationReceivedListener,
   addNotificationResponseReceivedListener as addExpoNotificationResponseReceivedListener,
+  getLastNotificationResponseAsync as getLastExpoNotificationResponseAsync,
 } from "expo-notifications";
 import {
   addAlipushNotificationReceivedListener,
   addAlipushNotificationResponseReceivedListener,
+  getLastAlipushNotificationResponse,
 } from "./AlipushNotificationEmitter";
 import type { Notification, NotificationResponse } from "./Notification.types";
 
@@ -49,6 +51,22 @@ export function addNotificationResponseReceivedListener(
     },
   };
 }
+
+export async function getLastNotificationResponseAsync(): Promise<NotificationResponse | null> {
+  const [lastExpoResponse, lastAlipushResponse] = await Promise.all([
+    getLastExpoNotificationResponseAsync(),
+    getLastAlipushNotificationResponse(),
+  ]);
+  if (
+    !lastExpoResponse ||
+    isAlipushNotificationResponseInExpoEvent(lastExpoResponse)
+  ) {
+    return lastAlipushResponse;
+  }
+  return lastExpoResponse;
+}
+
+/* utils */
 
 // TODO, should more exactly
 function isAlipushNotificationInExpoEvent(

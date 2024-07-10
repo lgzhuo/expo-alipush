@@ -7,7 +7,7 @@ import {
   getPermissionsAsync,
   type NotificationResponse,
   requestPermissionsAsync,
-  setNotificationChannelAsync
+  setNotificationChannelAsync,
 } from "expo-notifications";
 import React, { useEffect, useImperativeHandle, useRef, useState } from "react";
 import {
@@ -55,7 +55,12 @@ export default function App() {
       <View style={styles.headerContainer}>
         {Platform.OS === "android" && (
           <>
-            <Text style={{ userSelect: "text" }} onPress={() => console.log('Alipush devcieId: ' + AliyunPush.getDeviceId())}>
+            <Text
+              style={{ userSelect: "text" }}
+              onPress={() =>
+                console.log("Alipush devcieId: " + AliyunPush.getDeviceId())
+              }
+            >
               DeviceId: {AliyunPush.getDeviceId()}
             </Text>
             <NotificationChannel />
@@ -80,6 +85,18 @@ export default function App() {
           </Text>
           <Button title="Toggle" onPress={() => setIsAliyunEvents((v) => !v)} />
         </View>
+        <Button
+          title="getLastResponse"
+          onPress={() =>
+            (isAliyunEvents
+              ? AliyunPush.getLastNotificationResponseAsync()
+              : ExpoNotifications.getLastNotificationResponseAsync()
+            ).then(
+              (response) => alert(JSON.stringify(response, undefined, 2)),
+              console.error
+            )
+          }
+        />
         <View style={styles.row}>
           <Text>Events List</Text>
           <Button
@@ -321,7 +338,7 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
     justifyContent: "center",
     padding: 8,
-    gap: 4,
+    gap: 6,
   },
   row: {
     flexDirection: "row",

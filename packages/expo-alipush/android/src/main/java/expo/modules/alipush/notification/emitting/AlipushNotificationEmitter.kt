@@ -1,5 +1,6 @@
 package expo.modules.alipush.notification.emitting
 
+import android.os.Bundle
 import android.util.Log
 import expo.modules.alipush.notification.AlipushForegroundNotification
 import expo.modules.alipush.notification.AlipushNotification
@@ -28,6 +29,8 @@ class AlipushNotificationEmitter : Module(), AlipushNotificationListener, Notifi
 
     private lateinit var expoNotificationManager: NotificationManager
 
+    private var lastNotificationResponseBundle: Bundle? = null
+
     override fun definition() = ModuleDefinition {
         Name("AlipushNotificationEmitter")
 
@@ -37,11 +40,10 @@ class AlipushNotificationEmitter : Module(), AlipushNotificationListener, Notifi
         )
 
         OnCreate {
-
-            AlipushNotificationManager.addListener(this@AlipushNotificationEmitter)
-
             notificationTransformer =
                 NotificationTransformer(requireNotNull(appContext.reactContext))
+
+            AlipushNotificationManager.addListener(this@AlipushNotificationEmitter)
 
             expoNotificationManager = requireNotNull(
                 appContext.legacyModuleRegistry.getSingletonModule(
@@ -56,6 +58,10 @@ class AlipushNotificationEmitter : Module(), AlipushNotificationListener, Notifi
             AlipushNotificationManager.removeListener(this@AlipushNotificationEmitter)
 
             expoNotificationManager.removeListener(this@AlipushNotificationEmitter)
+        }
+
+        AsyncFunction<Bundle?>("getLastAlipushNotificationResponse") {
+            lastNotificationResponseBundle
         }
     }
 
@@ -90,6 +96,7 @@ class AlipushNotificationEmitter : Module(), AlipushNotificationListener, Notifi
             sendEvent(
                 NEW_RESPONSE_EVENT_NAME,
                 NotificationSerializer.toBundle(it)
+                    .also { responseBundle -> lastNotificationResponseBundle = responseBundle }
             )
         }
     }

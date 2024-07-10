@@ -1,30 +1,19 @@
-import { EventEmitter, Subscription } from "expo-modules-core";
+import {
+  EventEmitter,
+  type Subscription,
+  UnavailabilityError,
+} from "expo-modules-core";
 import AlipushNotificationEmitterModule from "./AlipushNotificationEmitterModule";
 import type {
-  AlipushForegroundNotification,
-  AlipushNotification,
-  Notification,
-  NotificationResponse,
-} from "./Notification.types";
+  AlipushTriggeredNotification,
+  AlipushTriggeredNotificationResponse,
+} from "./AlipushNotificationEmitterModule.types";
 
 const emitter = new EventEmitter(AlipushNotificationEmitterModule);
 
 const didReceiveNotificationEventName = "onDidReceiveAlipushNotification";
 const didReceiveNotificationResponseEventName =
   "onDidReceiveAlipushNotificationResponse";
-
-type AlipushTriggeredNotification = Notification & {
-  request: {
-    trigger: {
-      type: "push";
-      alipushNotification: AlipushNotification | AlipushForegroundNotification;
-    };
-  };
-};
-
-type AlipushTriggeredNotificationResponse = NotificationResponse & {
-  notification: AlipushTriggeredNotification;
-};
 
 export function addAlipushNotificationReceivedListener(
   listener: (event: AlipushTriggeredNotification) => void
@@ -36,4 +25,14 @@ export function addAlipushNotificationResponseReceivedListener(
   listener: (event: AlipushTriggeredNotificationResponse) => void
 ): Subscription {
   return emitter.addListener(didReceiveNotificationResponseEventName, listener);
+}
+
+export function getLastAlipushNotificationResponse() {
+  if (!AlipushNotificationEmitterModule.getLastAlipushNotificationResponse) {
+    throw new UnavailabilityError(
+      "AlipushNotificationEmitter",
+      "getLastAlipushNotificationResponse"
+    );
+  }
+  return AlipushNotificationEmitterModule.getLastAlipushNotificationResponse();
 }

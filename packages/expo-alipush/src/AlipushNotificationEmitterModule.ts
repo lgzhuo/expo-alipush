@@ -14,4 +14,4 @@ export default {
     }
   },
   removeListeners: () => {},
-} satisfies AlipushNotificationEmitterModule;
+} as AlipushNotificationEmitterModule;
