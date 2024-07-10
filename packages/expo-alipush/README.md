@@ -33,7 +33,50 @@ Run `npx pod-install` after installing the npm package.
 
 ### Configure for Android
 
-No additional setup necessary.
+因为 gradle 的限制，你需要在工程中添加阿里云推送和第三发华为推送的 maven 仓库地址
+
+#### plugin 配置
+
+```
+npx expo install expo-build-properties
+```
+
+在`app.json`中配置
+
+```json
+{
+  "plugins": [
+    [
+      "expo-build-properties",
+      {
+        "android": {
+          "extraMavenRepos": [
+            "https://developer.huawei.com/repo/",
+            "https://maven.aliyun.com/nexus/content/repositories/releases/"
+          ]
+        }
+      }
+    ]
+  ]
+}
+```
+
+#### 手动
+
+在 android 工程根 build.gradle 中添加如下配置
+
+```gradle
+  allprojects {
+    repositories {
+      maven {url 'https://developer.huawei.com/repo/'}
+      maven {
+        url 'http://maven.aliyun.com/nexus/content/repositories/releases/'
+        name 'aliyun'
+        allowInsecureProtocol = true
+      }
+    }
+  }
+```
 
 # 配置阿里云推送账号信息
 
@@ -42,17 +85,19 @@ No additional setup necessary.
 ```json
 {
   "plugins": [
-    "expo-alipush",
-    {
-      "android": {
-        "appKey": "Your Android AppKey",
-        "appSecret": "Your Android AppSecret"
-      },
-      "ios": {
-        "appKey": "Your iOS AppKey",
-        "appSecret": "Your iOS AppSecret"
+    [
+      "expo-alipush",
+      {
+        "android": {
+          "appKey": "Your Android AppKey",
+          "appSecret": "Your Android AppSecret"
+        },
+        "ios": {
+          "appKey": "Your iOS AppKey",
+          "appSecret": "Your iOS AppSecret"
+        }
       }
-    }
+    ]
   ]
 }
 ```
