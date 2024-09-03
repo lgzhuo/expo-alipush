@@ -103,6 +103,33 @@ class AlipushModule : Module() {
                 }
         }
 
+        AsyncFunction("checkPushChannelStatus") { promise: Promise ->
+            PushServiceFactory.getCloudPushService().checkPushChannelStatus(object :
+                    AsyncCallback(promise, "checkPushChannelStatus", resolve = { it }) {
+                    override fun onSuccess(response: String?) {
+                        if (response != "on" && response != "off") {
+                            Log.i(
+                                TAG, "$func response with unknown value $response"
+                            )
+                            promise.reject(
+                                mErrorCode, "response with unknown value $response", null
+                            )
+                            return
+                        }
+                        super.onSuccess(response)
+                    }
+                })
+        }
+
+        AsyncFunction("turnOnPushChannel") { promise: Promise ->
+            PushServiceFactory.getCloudPushService()
+                .turnOnPushChannel(AsyncCallback(promise, "turnOnPushChannel"))
+        }
+
+        AsyncFunction("turnOffPushChannel") { promise: Promise ->
+            PushServiceFactory.getCloudPushService()
+                .turnOffPushChannel(AsyncCallback(promise, "turnOffPushChannel"))
+        }
     }
 
     class CustomNotificationConfig : Record {
@@ -122,7 +149,8 @@ class AlipushModule : Module() {
     private open class AsyncCallback(
         val promise: Promise,
         val func: String,
-        val stringifyArg: String? = null
+        val stringifyArg: String? = null,
+        val resolve: (response: String?) -> Any? = { null }
     ) : CommonCallback {
         val mErrorCode: String
             get() = func.split("[A-Z]".toRegex())
@@ -130,7 +158,7 @@ class AlipushModule : Module() {
 
         override fun onSuccess(response: String?) {
             Log.i(TAG, "$func ${stringifyArg?.let { "[$it]" }} success $response")
-            promise.resolve(null);
+            promise.resolve(resolve(response));
         }
 
         override fun onFailed(errorCode: String?, errorMessage: String?) {
@@ -144,8 +172,6 @@ class AlipushModule : Module() {
     }
 
     enum class RegisterStatus {
-        None,
-        Registering,
-        Registered
+        None, Registering, Registered
     }
 }

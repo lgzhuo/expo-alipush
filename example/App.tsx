@@ -75,6 +75,7 @@ export default function App() {
             }}
           />
         </View>
+        {Platform.OS === "android" && <TogglePushChannel />}
         <BindAccount />
         <View style={styles.row}>
           <Text>
@@ -171,6 +172,43 @@ function BindAccount() {
         />
       </View>
     </View>
+  );
+}
+
+function TogglePushChannel() {
+  const [status, setStatus] = useState<string>();
+
+  const syncStatus = () => {
+    AliyunPush.checkPushChannelStatus().then(setStatus);
+  };
+
+  useEffect(syncStatus, []);
+
+  return (
+    <>
+      <View style={styles.row}>
+        <Text>Current push channel status: {status}</Text>
+        <Button title="Sync" onPress={syncStatus} />
+      </View>
+      <View style={styles.row}>
+        <Button
+          title="turnOn"
+          onPress={() => {
+            AliyunPush.turnOnPushChannel().then(() => {
+              setStatus("on");
+            }, console.error);
+          }}
+        />
+        <Button
+          title="turnOff"
+          onPress={() => {
+            AliyunPush.turnOffPushChannel().then(() => {
+              setStatus("off");
+            }, console.error);
+          }}
+        />
+      </View>
+    </>
   );
 }
 

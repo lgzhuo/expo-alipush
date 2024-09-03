@@ -5,10 +5,6 @@ import AlipushModule from "./AlipushModule";
 import { CustomNotificationConfig } from "./AlipushModule.types";
 
 export function init(): Promise<void> {
-  if (Platform.OS !== "ios") {
-    console.warn("[expo-alipush] init is not support in this platform");
-    return Promise.resolve();
-  }
   if (!AlipushModule.init) {
     throw new UnavailabilityError("expo-alipush", "init");
   }
@@ -19,13 +15,13 @@ export function register(deviceToken?: string): Promise<void> {
   if (!AlipushModule.register) {
     throw new UnavailabilityError("expo-alipush", "register");
   }
-  if (Platform.OS === "ios" && !deviceToken) {
+  if (Platform.OS === "ios") {
     if (!deviceToken) {
       throw new Error(
         "[expo-alipush] deviceToken is required, the value can be get by expo-notifications"
       );
     }
-    AlipushModule.register(deviceToken);
+    return AlipushModule.register(deviceToken);
   }
   return AlipushModule.register();
 }
@@ -45,7 +41,7 @@ export function bindAccount(account: string): Promise<void> {
 }
 
 export function unbindAccount(): Promise<void> {
-  if (!AlipushModule.bindAccount) {
+  if (!AlipushModule.unbindAccount) {
     throw new UnavailabilityError("expo-alipush", "unbindAccount");
   }
   return AlipushModule.unbindAccount();
@@ -66,4 +62,25 @@ export function setCustomNotificationConfig(
     );
   }
   return AlipushModule.setCustomNotificationConfig(id, config);
+}
+
+export function checkPushChannelStatus() {
+  if (!AlipushModule.checkPushChannelStatus) {
+    throw new UnavailabilityError("expo-alipush", "checkPushChannelStatus");
+  }
+  return AlipushModule.checkPushChannelStatus();
+}
+
+export function turnOnPushChannel() {
+  if (!AlipushModule.turnOnPushChannel) {
+    throw new UnavailabilityError("expo-alipush", "turnOnPushChannel");
+  }
+  return AlipushModule.turnOnPushChannel();
+}
+
+export function turnOffPushChannel() {
+  if (!AlipushModule.turnOffPushChannel) {
+    throw new UnavailabilityError("expo-alipush", "turnOffPushChannel");
+  }
+  return AlipushModule.turnOffPushChannel();
 }
