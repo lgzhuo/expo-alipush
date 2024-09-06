@@ -38,11 +38,15 @@ class AlipushModule : Module() {
             ),
         )
 
-        AsyncFunction("register") { promise: Promise ->
+        /**
+         * Name this function to 'init' to stay the same with ios side, as this function should called
+         * exactly once in app's lifecycle。And function 'register' could called multiple times in ios
+         */
+        AsyncFunction("init") { promise: Promise ->
             if (registerStatus == RegisterStatus.Registering) {
                 promise.reject(
-                    "E_REGISTER_REPEAT",
-                    "Another register call is in progress, await the previous call",
+                    "E_INIT_REPEAT",
+                    "Another init call is in progress, await the previous call",
                     null
                 )
                 return@AsyncFunction
@@ -52,7 +56,7 @@ class AlipushModule : Module() {
             }
             registerStatus = RegisterStatus.Registering
             PushServiceFactory.getCloudPushService()
-                .register(context, object : AsyncCallback(promise, "register") {
+                .register(context, object : AsyncCallback(promise, "init") {
                     override fun onFailed(errorCode: String?, errorMessage: String?) {
                         super.onFailed(errorCode, errorMessage)
                         registerStatus = RegisterStatus.None

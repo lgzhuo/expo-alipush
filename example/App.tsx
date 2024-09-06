@@ -45,36 +45,17 @@ AliyunPush.setCustomNotificationConfig(11, {
 });
 
 export default function App() {
-  const [hasRegistered, setHasRegistered] = useState<boolean>();
-
   const eventsRef = useRef<{ clear(): void }>(null);
   const [isAliyunEvents, setIsAliyunEvents] = useState(true);
 
   const renderHeader = () => {
     return (
       <View style={styles.headerContainer}>
-        {Platform.OS === "android" && (
-          <>
-            <Text
-              style={{ userSelect: "text" }}
-              onPress={() =>
-                console.log("Alipush devcieId: " + AliyunPush.getDeviceId())
-              }
-            >
-              DeviceId: {AliyunPush.getDeviceId()}
-            </Text>
-            <NotificationChannel />
-          </>
-        )}
-        <View style={styles.row}>
-          <Text>Register status: {hasRegistered ? "Done" : "Idle"}</Text>
-          <Button
-            title="Register"
-            onPress={() => {
-              register().then(() => setHasRegistered(true), console.error);
-            }}
-          />
-        </View>
+        <NotificationPermission />
+        <InitializeAlipush />
+        <DeviceID />
+        {Platform.OS === "android" && <NotificationChannel />}
+        {Platform.OS === "ios" && <RegisterDevcie />}
         {Platform.OS === "android" && <TogglePushChannel />}
         <BindAccount />
         <View style={styles.row}>
@@ -118,9 +99,72 @@ export default function App() {
   );
 }
 
+function NotificationPermission() {
+  const [permissionResult, setPermissionResult] = useState("unknown");
+  useEffect(() => {
+    requestNotificationPermission().then(setPermissionResult);
+  }, []);
+  return (
+    <View style={styles.row}>
+      <Text>Notification Permission Result: {permissionResult}</Text>
+      <Button
+        title="Request"
+        onPress={() =>
+          requestNotificationPermission().then(setPermissionResult)
+        }
+      />
+    </View>
+  );
+}
+
+function InitializeAlipush() {
+  const [hasInitialzied, setHasInitialized] = useState(false);
+  useEffect(() => {
+    AliyunPush.init().then(() => {
+      setHasInitialized(true);
+    }, console.error);
+  }, []);
+  return (
+    <View style={styles.row}>
+      <Text>Initialize result: {hasInitialzied ? "Done" : "Not"}</Text>
+    </View>
+  );
+}
+
+function RegisterDevcie() {
+  const [hasRegistered, setHasRegistered] = useState<boolean>();
+
+  return (
+    <View style={styles.row}>
+      <Text>Register status: {hasRegistered ? "Done" : "Idle"}</Text>
+      <Button
+        title="Register"
+        onPress={() => {
+          register().then(() => setHasRegistered(true), console.error);
+        }}
+      />
+    </View>
+  );
+}
+
+function DeviceID() {
+  const [deviceId, setDeviceId] = useState("");
+  return (
+    <View style={styles.row}>
+      <Text style={{ userSelect: "text" }}>Device Id: {deviceId}</Text>
+      <Button
+        title="Get"
+        onPress={() => {
+          setDeviceId(AliyunPush.getDeviceId);
+          console.log("Alipush deviceId: " + AliyunPush.getDeviceId());
+        }}
+      />
+    </View>
+  );
+}
+
 function NotificationChannel() {
   const [channelId, setChannelId] = useState("default");
-  const [name, setName] = useState("default");
   return (
     <View>
       <View style={styles.row}>
@@ -355,17 +399,7 @@ async function requestNotificationPermission() {
 }
 
 async function register() {
-  const permissionResult = await requestNotificationPermission();
-  if (permissionResult !== "granted") {
-    throw new Error("Push Notification Permission Denied");
-  }
-
-  let deviceToken: string | undefined;
-  if (Platform.OS === "ios") {
-    await AliyunPush.init();
-
-    deviceToken = (await getDevicePushTokenAsync()).data;
-  }
+  const deviceToken = (await getDevicePushTokenAsync()).data;
 
   await AliyunPush.register(deviceToken);
 }
