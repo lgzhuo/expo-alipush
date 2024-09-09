@@ -17,6 +17,7 @@ const {
     addMetaDataItemToMainApplication,
     removeMetaDataItemFromMainApplication,
   },
+  BuildProperties: {updateAndroidBuildProperty},
 } = AndroidConfig;
 
 const withAlipushAndroidConfig: ConfigPlugin<AlipushConfig> = (
@@ -59,11 +60,11 @@ const withThirdXiaomi: ConfigPlugin<AndroidThirdConfig['xiaomi']> = (
 
   const enabled = Boolean(platformConfig?.appID && platformConfig.appKey);
   config = withGradleProperties(config, config => {
-    config.modResults.push({
-      type: 'property',
-      key: 'alipush.third.xiaomi.enabled',
-      value: String(enabled),
-    });
+    updateAndroidBuildProperty(
+      config.modResults,
+      'alipush.third.xiaomi.enabled',
+      String(enabled),
+    );
     return config;
   });
 
@@ -81,11 +82,11 @@ const withThirdHuawei: ConfigPlugin<AndroidThirdConfig['huawei']> = (
 
   const enabled = Boolean(platfromConfig?.appID);
   config = withGradleProperties(config, config => {
-    config.modResults.push({
-      type: 'property',
-      key: 'alipush.third.huawei.enabled',
-      value: String(enabled),
-    });
+    updateAndroidBuildProperty(
+      config.modResults,
+      'alipush.third.huawei.enabled',
+      String(enabled),
+    );
     return config;
   });
 
