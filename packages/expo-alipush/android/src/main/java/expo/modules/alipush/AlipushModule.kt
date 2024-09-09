@@ -109,20 +109,15 @@ class AlipushModule : Module() {
 
         AsyncFunction("checkPushChannelStatus") { promise: Promise ->
             PushServiceFactory.getCloudPushService().checkPushChannelStatus(object :
-                    AsyncCallback(promise, "checkPushChannelStatus", resolve = { it }) {
-                    override fun onSuccess(response: String?) {
-                        if (response != "on" && response != "off") {
-                            Log.i(
-                                TAG, "$func response with unknown value $response"
-                            )
-                            promise.reject(
-                                mErrorCode, "response with unknown value $response", null
-                            )
-                            return
-                        }
-                        super.onSuccess(response)
+                AsyncCallback(promise, "checkPushChannelStatus", getResolveValue = { it }) {
+                override fun onSuccess(response: String?) {
+                    if (response != "on" && response != "off") {
+                        reject("response with unknown value $response")
+                        return
                     }
-                })
+                    super.onSuccess(response)
+                }
+            })
         }
 
         AsyncFunction("turnOnPushChannel") { promise: Promise ->
@@ -154,15 +149,33 @@ class AlipushModule : Module() {
         val promise: Promise,
         val func: String,
         val stringifyArg: String? = null,
-        val resolve: (response: String?) -> Any? = { null }
+        val getResolveValue: (response: String?) -> Any? = { null }
     ) : CommonCallback {
         val mErrorCode: String
             get() = func.split("[A-Z]".toRegex())
                 .joinToString("_", "E_") { it.uppercase(Locale.getDefault()) }
 
+        private var hasSettled = false
+
+        fun checkHasSettled(body: () -> Unit) {
+            if (hasSettled) {
+                Log.w(TAG, "$func callback multiple times")
+            } else {
+                body()
+            }
+        }
+
+        fun resolve(value: Any?) {
+            checkHasSettled { promise.resolve(value) }
+        }
+
+        fun reject(message: String?, cause: Throwable? = null) {
+            checkHasSettled { promise.reject(mErrorCode, message, cause) }
+        }
+
         override fun onSuccess(response: String?) {
             Log.i(TAG, "$func ${stringifyArg?.let { "[$it]" }} success $response")
-            promise.resolve(resolve(response));
+            resolve(getResolveValue(response));
         }
 
         override fun onFailed(errorCode: String?, errorMessage: String?) {
@@ -170,9 +183,8 @@ class AlipushModule : Module() {
                 TAG,
                 "$func ${stringifyArg?.let { "[$it]" }} failed -- code:$errorCode --  message:$errorMessage"
             )
-            promise.reject(mErrorCode, "$errorCode:$errorMessage", null)
+            reject("$errorCode:$errorMessage")
         }
-
     }
 
     enum class RegisterStatus {
